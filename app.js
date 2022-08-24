@@ -6,6 +6,7 @@ app.use(express.json())
 app.use(express.urlencoded())
 app.use(cors())
 
+
 const url = "mongodb+srv://root:root@cluster0.kpkuzbh.mongodb.net/marketplace?retryWrites=true&w=majority"
 
 mongoose.connect(url, {
@@ -167,5 +168,16 @@ app.post("/mint", async (req, resp) => {
     }
 })
 
+
+// delete this later
+
+// app.post("/mint", async (req, resp) => {
+//     console.log(req.body)
+//     try {
+//         await Data.deleteOne({ id: 13 })
+//     } catch (error) {
+//         console.log(error)
+//     }
+// })
 
 app.listen(5000)
