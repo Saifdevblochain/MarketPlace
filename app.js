@@ -169,7 +169,7 @@ app.post("/mint", async (req, resp) => {
 })
 
 
-// delete this later
+// delete 
 
 // app.post("/mint", async (req, resp) => {
 //     console.log(req.body)
