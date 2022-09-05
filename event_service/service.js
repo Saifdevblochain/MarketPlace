@@ -1,15 +1,20 @@
 const { ethers, Contract } = require("ethers");
+const redis= require('redis')
 const { connectDB, Users, Nfts, Marketplace } = require('../db/mongo')
 const abi = require("./abi.json")
 require("dotenv").config()
+const publisher = redis.createClient();
+
+publisher.connect();
+
 
 const rpcUrl = process.env.rpcUrl;
+
 const deployedAddress = process.env.deployedAddress;
 const privatekey = process.env.privatekey;
 const url = process.env.URL;
 
-const from = "0xaF09B9535E239AaDcC2B96331341647F84a3537f";
-const to = "0x34136d58CB3ED22EB4844B481DDD5336886b3cec";
+
 let provider = ethers.getDefaultProvider(rpcUrl); //rpc url is from Alchemy: testnet that you used
 
 const wallet = new ethers.Wallet(privatekey, provider);
@@ -18,9 +23,10 @@ let contractWithSigner = contract.connect(wallet);
 // ... OR ...
 // let contractWithSigner = new Contract(deployedAddress, abi, wallet);
 
+console.log("working 1");
 
 contract.on("Transfer", async (from, to, _id) => {
-
+    
     const id = parseInt(_id.toString());
     const toUser = await Users.findOne({ wallet: to });
     const toNfts = await Nfts.findOne({ user: toUser._id });
@@ -29,6 +35,7 @@ contract.on("Transfer", async (from, to, _id) => {
         // add id to the users nft_collection
         toNfts.nfts_collection.push(id);
         await toNfts.save();
+        await publisher.publish("message",JSON.stringify({from, to, id, status: "New"}));
     }
     else {
         const fromUser = await Users.findOne({ wallet: from });
@@ -39,8 +46,12 @@ contract.on("Transfer", async (from, to, _id) => {
 
         toNfts.nfts_collection.push(id)
         await toNfts.save()
+        await publisher.publish("message",JSON.stringify({from, to, id, status: "transer"})
+        );
 
     }
+ 
+
 
     console.log(
         {
@@ -49,41 +60,8 @@ contract.on("Transfer", async (from, to, _id) => {
             id: id.toString()
         }
     )
+    
 });
 
-
-(async () => {
-
-    try {
-        const isConnected = await connectDB(url)
-
-        // !isConnected && (process.abort()); // Short circuit
-
-        if (!isConnected) {
-            process.abort();
-        }
-
-
-        let mint = await contractWithSigner.mintNFT(from);
-        console.log("Mint is :", mint);
-
-
-        const Name_ = await contract.name()
-        console.log("name of NFT is :", Name_)
-
-
-        // await contract.transferFrom(from, to, 1);
-
-
-        let bal = await contract.balanceOf(from);
-        console.log("balanceOf is", bal.toString())
-
-        // let ownerOf = await contract.ownerOf(1);
-        // console.log("ownerOf Token id 1 is :", ownerOf);
-
-    } catch (error) {
-        console.log(error)
-    }
-})
-    ()
+console.log("working 2");
 

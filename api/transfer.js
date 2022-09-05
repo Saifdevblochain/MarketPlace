@@ -1,41 +1,36 @@
 const express = require('express');
+require("dotenv").config()
+const { ethers, Contract } = require("ethers");
 const { connectDB, Nfts, Users, Marketplace } = require('../db/mongo');
+const abi = require("./abi.json")
 
 const transfer = express.Router();
 
+
+const rpcUrl = process.env.rpcUrl;
+const deployedAddress = process.env.deployedAddress;
+const privatekey = process.env.privatekey;
+const url = process.env.URL;
+
+const from = "0xaF09B9535E239AaDcC2B96331341647F84a3537f";
+const to = "0x34136d58CB3ED22EB4844B481DDD5336886b3cec";
+let provider = ethers.getDefaultProvider(rpcUrl); //rpc url is from Alchemy: testnet that you used
+
+const wallet = new ethers.Wallet(privatekey, provider);
+const contract = new ethers.Contract(deployedAddress, abi, provider);
+let contractWithSigner = contract.connect(wallet);
+// ... OR ...
+// let contractWithSigner = new Contract(deployedAddress, abi, wallet);
+
 transfer.post("/", async (req, resp) => {
+    const isConnected = await connectDB(url)
+    // !isConnected && (process.abort()); // Short circuit
 
-
-    const fromUserWallet = req.body.from;
-    const toUserWallet = req.body.to;
-    const nftID = req.body.id;
-
-    // get user with {req.nody.from} and save it in const userOne
-    // check if from user is the owner of {req.body.token}
-    const userOne = await Users.findOne({ wallet: fromUserWallet })
-    const userOneNFTS = await Nfts.findOne({ user: userOne._id })
-
-    console.log(userOneNFTS);
-
-    if ((userOneNFTS.nfts_collection).includes(nftID)) {
-        // delete {req.body.id} from userOne
-        userOneNFTS.nfts_collection = userOneNFTS.nfts_collection.filter(item => item !== nftID);
-        await userOneNFTS.save();
-        // get user with {req.body.to} and save it in const userTwo
-        const userTwo = await Users.findOne({ wallet: toUserWallet })
-        const userTwoNFTS = await Nfts.findOne({ user: userTwo._id })
-
-
-
-        // add {req.body.id} to userTwo
-        userTwoNFTS.nfts_collection.push(nftID);
-        await userTwoNFTS.save();
-
-        return resp.status(200).json({ message: "success" })
-    } else {
-        // error
-        return resp.status(400).json({ nessage: "user does not own the toke ID" })
+    if (!isConnected) {
+        process.abort();
     }
+    let mint = await contractWithSigner.mintNFT(from);
+   
+   
 })
-
 module.exports = { transfer }
