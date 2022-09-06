@@ -7,21 +7,16 @@ const publisher = redis.createClient();
 
 publisher.connect();
 
-
+ 
 const rpcUrl = process.env.rpcUrl;
 
 const deployedAddress = process.env.deployedAddress;
 const privatekey = process.env.privatekey;
-const url = process.env.URL;
-
-
+ 
 let provider = ethers.getDefaultProvider(rpcUrl); //rpc url is from Alchemy: testnet that you used
 
 const wallet = new ethers.Wallet(privatekey, provider);
 const contract = new ethers.Contract(deployedAddress, abi, provider);
-let contractWithSigner = contract.connect(wallet);
-// ... OR ...
-// let contractWithSigner = new Contract(deployedAddress, abi, wallet);
 
 console.log("working 1");
 
@@ -52,16 +47,14 @@ contract.on("Transfer", async (from, to, _id) => {
     }
  
 
-
-    console.log(
-        {
-            from: from,
-            to: to,
-            id: id.toString()
-        }
-    )
+    // console.log(
+    //     {
+    //         from: from,
+    //         to: to,
+    //         id: id.toString()
+    //     }
+    // )
     
 });
 
-console.log("working 2");
 

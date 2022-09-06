@@ -20,17 +20,18 @@ import axios from 'axios'
         console.log(`NFT of Token ID ${data.id} Transferred`);
       }
     };
+    // var itemRouter = require('express').Router({ mergeParams: true }); 
 
+
+    // axios.get(url, { address: addressTo }
+    const minting = async() => {
+      console.log(addressTo)
+     
+     const res= await axios.post("http://localhost:5000/mint/mintRouter", { address: addressTo })
+          console.log(res)
+
+          }
   
-    const minting = () => {
-
-      axios.post("http://localhost:5000/mint", addressTo)
-          .then(res => {
-
-              alert(res.data.message)
-
-          })
-  }
 
 
 

@@ -26,11 +26,12 @@ mintRouter.post("/", async (req, resp) => {
     if (!isConnected) {
         process.abort();
     }
-    let {from}= req.body
-    console.log(from)
+    let address= req.body.address
+    console.log(address)
     
-    let mint = await contractWithSigner.mintNFT(from);
-   
+    let mint = await contractWithSigner.mintNFT(address);
+    return resp.status(200).json({ message: " NFT Minted SuccessFully ! " })
+    
    
 })
 
