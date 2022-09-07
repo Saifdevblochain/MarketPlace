@@ -12,8 +12,8 @@ const deployedAddress = process.env.deployedAddress;
 const privatekey = process.env.privatekey;
 const url = process.env.URL;
 
-const from = "0xaF09B9535E239AaDcC2B96331341647F84a3537f";
-const to = "0x34136d58CB3ED22EB4844B481DDD5336886b3cec";
+// const from = "0xaF09B9535E239AaDcC2B96331341647F84a3537f";
+// const to = "0x34136d58CB3ED22EB4844B481DDD5336886b3cec";
 let provider = ethers.getDefaultProvider(rpcUrl); //rpc url is from Alchemy: testnet that you used
 
 const wallet = new ethers.Wallet(privatekey, provider);
@@ -29,7 +29,9 @@ transfer.post("/", async (req, resp) => {
     if (!isConnected) {
         process.abort();
     }
-    let mint = await contractWithSigner.mintNFT(from);
+    const {From,To,Id}= req.body
+    const transfer = await contractWithSigner.transferFrom(From,To,Id);
+      return resp.status(200).json({ message: " Transferred NFT SuccessFully ! " })
    
    
 })

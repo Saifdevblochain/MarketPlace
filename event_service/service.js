@@ -12,15 +12,22 @@ const rpcUrl = process.env.rpcUrl;
 
 const deployedAddress = process.env.deployedAddress;
 const privatekey = process.env.privatekey;
- 
+const url = process.env.URL;
 let provider = ethers.getDefaultProvider(rpcUrl); //rpc url is from Alchemy: testnet that you used
 
 const wallet = new ethers.Wallet(privatekey, provider);
 const contract = new ethers.Contract(deployedAddress, abi, provider);
 
-console.log("working 1");
-
+ console.log("its on");
+  
 contract.on("Transfer", async (from, to, _id) => {
+    const isConnected = await connectDB(url)
+    console.log("2")
+    // !isConnected && (process.abort()); // Short circuit
+
+    if (!isConnected) {
+        process.abort();
+    }
     
     const id = parseInt(_id.toString());
     const toUser = await Users.findOne({ wallet: to });
@@ -41,19 +48,19 @@ contract.on("Transfer", async (from, to, _id) => {
 
         toNfts.nfts_collection.push(id)
         await toNfts.save()
-        await publisher.publish("message",JSON.stringify({from, to, id, status: "transer"})
+        await publisher.publish("message",JSON.stringify({from, to, id, status: "transfer"})
         );
 
     }
  
 
-    // console.log(
-    //     {
-    //         from: from,
-    //         to: to,
-    //         id: id.toString()
-    //     }
-    // )
+    console.log(
+        {
+            from: from,
+            to: to,
+            id: id.toString()
+        }
+    )
     
 });
 

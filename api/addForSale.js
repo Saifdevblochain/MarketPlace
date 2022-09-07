@@ -1,42 +1,38 @@
-
-
-const express = require("express");
-
-const addForSale = express.Router();
+const express = require('express');
+require("dotenv").config()
+const { ethers, Contract } = require("ethers");
 const { connectDB, Nfts, Users, Marketplace } = require('../db/mongo');
+const abi = require("./abi.json")
 
-addForSale.post("/", async (req, resp) => {
-
-    // await Marketplace.create({forSaleIds: [1,2,3]})
-
-    const marketDocument = await Marketplace.findOne({ forSaleIds: req.body.forSaleIds });
-
-    console.log("MarketDocuments", marketDocument)
-
-    if (!marketDocument.forSaleIds.includes(req.body.forSaleIds)) {
-
-        marketDocument.forSaleIds.map((item) => console.log(item))
+ 
 
 
-        // await Marketplace.forSaleIds.push(req.body.forSaleIds);
+const rpcUrl = process.env.rpcUrl;
+const deployedAddress = process.env.deployedAddress;
+const privatekey = process.env.privatekey;
+const url = process.env.URL;
 
+const from = "0xaF09B9535E239AaDcC2B96331341647F84a3537f";
+const to = "0x34136d58CB3ED22EB4844B481DDD5336886b3cec";
+let provider = ethers.getDefaultProvider(rpcUrl); //rpc url is from Alchemy: testnet that you used
 
-        await marketDocument.forSaleIds.push(req.body.forSaleIds);
+const wallet = new ethers.Wallet(privatekey, provider);
+const contract = new ethers.Contract(deployedAddress, abi, provider);
+let contractWithSigner = contract.connect(wallet);
+// ... OR ...
+// let contractWithSigner = new Contract(deployedAddress, abi, wallet);
 
-        // await Marketplace.save();
+ 
+   (async()=>{
+    const isConnected = await connectDB(url)
+    // !isConnected && (process.abort()); // Short circuit
 
-        await marketDocument.save()
-
-        console.log(req.body.forSaleIds)
-
-        return resp.status(200).json({ message: "ID Added for sale" })
-
-    } else {
-
-        console.log(rmarketDocument.forSaleIds)
-
-        return resp.status(200).json({ message: "ID Already exists" })
+    if (!isConnected) {
+        process.abort();
     }
-})
-
-module.exports = { addForSale }
+     
+    const transfer = await contractWithSigner.transferFrom(from,to,2);
+      console.log("transferred Succesfully")
+   
+   })()
+ 
