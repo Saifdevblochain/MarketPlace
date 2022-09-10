@@ -1,10 +1,11 @@
 const express = require('express');
 const { connectDB, Nfts, Users, Marketplace } = require('../db/mongo');
 
-const addUser = express.Router();
+const adduser = express.Router();
 
-addUser.post("/", async () => {
-    const checkWallet = await Users.findOne({ wallet: req.body.wallet });
+adduser.post("/", async (req,resp) => {
+    let address_ =req.body.wallet
+    const checkWallet = await Users.findOne({ wallet: address_ });
     if (checkWallet) {
         return resp.status(200).json({ message: "User Exists" });
     } else {
@@ -14,4 +15,4 @@ addUser.post("/", async () => {
     }
 })
 
-module.exports = { addUser }
+module.exports = { adduser }
